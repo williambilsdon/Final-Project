@@ -31,27 +31,35 @@ def specgram(source, genre, destination, filename):
     frequency_rate, data = wav.read(holder, 'r')
     fig = plt.figure(figsize = (19,12))
     pxx, frequency, bins, im = plt.specgram(x=data, Fs = frequency_rate, cmap = 'plasma', NFFT = 1024)
-    plt.ylim([0, 12000])
+    plt.ylim([0, 8000])
     location = destination + '/' + genre + '/' + filename
     plt.savefig(location)
     plt.close()
 
     os.remove(holder)
 
+i = 0
 
 for root, dirs, files in os.walk(source):
     for filename in files:
         if os.path.splitext(filename)[1] == ".mp3":
             trackNum = os.path.splitext(filename)[0]
 
+            print(i)
+            i = i + 1
+
             with open(csvFileLocal, 'r') as csvfile:
                 my_content = csv.reader(csvfile, delimiter=',')
                 for row in my_content:
+
                     if trackNum in row:
                         location = os.path.join(root, filename)
                         print(location)
-                        specgram(location, row[1], destination, trackNum)     
-                        print("specsaved")      
+                        try:
+                            specgram(location, row[1], destination, trackNum) 
+                            print("specsaved")      
+                        except:
+                            print("error")
 
             
 
