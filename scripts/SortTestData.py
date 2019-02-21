@@ -1,6 +1,10 @@
 
 import os
-from mp3_tagger import MP3File, VERSION_1, VERSION_2, VERSION_BOTH
+import eyed3
+
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3, APIC, TIT2, TPE1, TRCK, TALB, USLT, error
+
 
 source = ("../../../Desktop/fma_small")
 sourceFolders = os.listdir(source)
@@ -14,9 +18,18 @@ for root, dirs, files in os.walk(source):
     for filename in files:
         if os.path.splitext(filename)[1] == ".mp3":
             file = os.path.join(root, filename)
-            mp3 = MP3File(file)
-            if mp3.genre in genres:
-                os.rename(file, destination + mp3.genre)
+            #os.chmod(file, S_IWOTH)
+            #mp3 = MP3File(file)
+
+            #song = eyed3.load(file)
+            song = MP3(file, ID3=ID3)
+
+            if song.tags.genre in genres:
+                print("yes")
+                #os.rename(file, destination + mp3.genre)
+                #shutil.copyfile(file, destination + mp3.genre)
+
+print("done")
             
 
 
