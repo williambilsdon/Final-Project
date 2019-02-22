@@ -32,7 +32,3 @@ plt.savefig('spectogram5.png')
 os.remove(dest)
 
 print("finished")
-
-
-
-

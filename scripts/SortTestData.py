@@ -1,11 +1,19 @@
 
+@inproceedings{fma_dataset,
+  title = {FMA: A Dataset for Music Analysis},
+  author = {Defferrard, Micha\"el and Benzi, Kirell and Vandergheynst, Pierre and Bresson, Xavier},
+  booktitle = {18th International Society for Music Information Retrieval Conference},
+  year = {2017},
+  url = {https://arxiv.org/abs/1612.01840},
+}
+
 import os
 import csv
 from pydub import AudioSegment as audiosegment
 import matplotlib.pyplot as plt
 from scipy.io import wavfile as wav
 
-source = ("../../../Desktop/fma_small")
+source = ("../../../Desktop/fma_medium")
 csvFileLocal = ("../../../Desktop/fma_small/tracksordered.csv")
 sourceFolders = os.listdir(source)
 destination = ("../tests/Spectograms")
@@ -38,15 +46,14 @@ def specgram(source, genre, destination, filename):
 
     os.remove(holder)
 
-i = 0
+classical = 0
+country = 0
+jazz = 0
 
 for root, dirs, files in os.walk(source):
     for filename in files:
         if os.path.splitext(filename)[1] == ".mp3":
             trackNum = os.path.splitext(filename)[0]
-
-            print(i)
-            i = i + 1
 
             with open(csvFileLocal, 'r') as csvfile:
                 my_content = csv.reader(csvfile, delimiter=',')
@@ -56,8 +63,18 @@ for root, dirs, files in os.walk(source):
                         location = os.path.join(root, filename)
                         print(location)
                         try:
-                            specgram(location, row[1], destination, trackNum) 
-                            print("specsaved")      
+                            if row[1] == "Classical" and classical < 390:
+                                specgram(location, row[1], destination, trackNum) 
+                                print("specsaved") 
+                                classical+=1
+                            elif row[1] == "Country" and country < 390:    
+                                specgram(location, row[1], destination, trackNum) 
+                                print("specsaved")
+                                country+=1 
+                            elif row[1] == "Jazz" and jazz < 390:
+                                specgram(location, row[1], destination, trackNum) 
+                                print("specsaved")  
+                                jazz+=1
                         except:
                             print("error")
 
