@@ -10,8 +10,6 @@ holder = "holder.wav"
 
 
 
-genres = ["Hip-Hop", "Pop", "Rock", "Jazz", "Classical", "Country"]
-
 
 
 def specgram(trackDest, genre, trackSource):

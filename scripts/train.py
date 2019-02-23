@@ -7,6 +7,3 @@ from tensorflow import keras
 # Helper libraries
 import numpy as np
 import matplotlib.pyplot as plt
-
-import image_slicer
-image_slicer.slice('test.png', 10)
