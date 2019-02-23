@@ -26,17 +26,16 @@ def specgram(trackDest, genre, trackSource):
 
 
     frequency_rate, data = wav.read(holder, 'r')
-    fig = plt.figure(figsize = (19,12))
+    fig, ax = plt.subplots(1)
+    fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
+    ax.axis('off')
     pxx, frequency, bins, im = plt.specgram(x=data, Fs = frequency_rate, cmap = 'plasma', NFFT = 1024)
-    plt.ylim([0, 8000])
-    plt.savefig(trackDest)
+    plt.ylim([0, 10000])
+    ax.axis('off')
+    fig.savefig(trackDest, dpi=500, frameon='false')
     plt.close()
 
     os.remove(holder)
-
-classical = 0
-country = 0
-jazz = 0
 
 for root, dirs, files in os.walk(source):
     for filename in files:
