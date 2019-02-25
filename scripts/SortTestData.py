@@ -3,6 +3,8 @@ from pydub import AudioSegment as audiosegment
 import matplotlib.pyplot as plt
 from scipy.io import wavfile as wav
 
+from ImageSlicer import imageSlice
+
 source = ("../gtzan")
 sourceFolders = os.listdir(source)
 destination = ("../tests")
@@ -35,18 +37,22 @@ def specgram(trackDest, genre, trackSource):
 
     os.remove(holder)
 
+    imageSlice(trackDest)
+
+    os.remove(trackDest)
+
 for root, dirs, files in os.walk(source):
     for filename in files:
         trackNum = os.path.splitext(filename)[0]
         #print(trackNum)
-        genre = trackNum.split(".")
+        splitName = trackNum.split(".")
 
-        trackDest = destination + '/' + genre[0] + '/' + trackNum + '.png'
-        trackSource = source + '/' + genre[0] + '/' + filename
+        trackDest = destination + '/' + splitName[0] + '_' + splitName[1] + '.png'
+        trackSource = source + '/' + splitName[0] + '/' + filename
 
         #print(trackSource)
 
-        specgram(trackDest, genre, trackSource)
+        specgram(trackDest, splitName, trackSource)
 
 
 
