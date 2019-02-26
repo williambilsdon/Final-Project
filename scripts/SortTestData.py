@@ -7,7 +7,7 @@ from ImageSlicer import imageSlice
 
 source = ("../gtzan")
 sourceFolders = os.listdir(source)
-destination = ("../tests")
+destination = ("../training data")
 holder = "holder.wav"
 
 
