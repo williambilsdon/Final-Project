@@ -7,14 +7,15 @@ from ImageSlicer import imageSlice
 
 source = ("../gtzan")
 sourceFolders = os.listdir(source)
-destination = ("../training data")
+destination = ("../wholepngs/training data")
+sDestination = ("../slices/training data")
 holder = "holder.wav"
 
 
 
 
 
-def specgram(trackDest, genre, trackSource):
+def specgram(trackDest, genre, trackSource, sliceDest):
     file = audiosegment.from_mp3(trackSource)
 
     #check if mp3 is mono audio
@@ -37,9 +38,7 @@ def specgram(trackDest, genre, trackSource):
 
     os.remove(holder)
 
-    imageSlice(trackDest)
-
-    os.remove(trackDest)
+    imageSlice(trackDest, sliceDest)
 
 for root, dirs, files in os.walk(source):
     for filename in files:
@@ -48,11 +47,14 @@ for root, dirs, files in os.walk(source):
         splitName = trackNum.split(".")
 
         trackDest = destination + '/' + splitName[0] + '_' + splitName[1] + '.png'
+
         trackSource = source + '/' + splitName[0] + '/' + filename
+
+        sliceDest = sDestination 
 
         #print(trackSource)
 
-        specgram(trackDest, splitName, trackSource)
+        specgram(trackDest, splitName, trackSource, sliceDest)
 
 
 

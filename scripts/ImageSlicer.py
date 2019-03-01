@@ -1,7 +1,7 @@
 import cv2
 import os
 
-def imageSlice(source):
+def imageSlice(source, sliceDest):
 
     imageX = 3200
     numSlices = 10
@@ -20,7 +20,11 @@ def imageSlice(source):
             original = cv2.imread(location)
             slice = original[0:2400, int(xPos):int(newX)]
 
-            cv2.imwrite((filename + '_' + str(i) + '.png'), slice)
+            name = filename.split('/')
+
+            cv2.imwrite((sliceDest + '/' + name[3] + '_' + str(i) + '.png'), slice)
+
+            #print(sliceDest + '/' + name[3] + '_' + str(i) + '.png')
 
             xPos += xStride
             newX += xStride
