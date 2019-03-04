@@ -23,7 +23,7 @@ def extract(source, toMakeTest, toMakeValidate, dest):
                     print(testTrack[1])
                     originalFile = root + '/' + name + '.png'
 
-                    destination = dest + '/' + name + '.png'
+                    destination = destVal + '/' + name + '.png'
 
                     shutil.move(originalFile, destination)
                 elif testTrack[1] in toMakeValidate:
@@ -35,7 +35,7 @@ def extract(source, toMakeTest, toMakeValidate, dest):
                     shutil.move(originalFile, destination)
 
 
-extract(source, toMakeTest, toMakeValidate, dest)
+extract('../slices/test data', toMakeTest, toMakeValidate, dest)
 
 print('here')
 
