@@ -8,6 +8,10 @@ destVal = '../slices/validation data'
 
 toMakeTest = ['00034', '00026', '00059', '00084', '00005']
 toMakeValidate = ['00000', '00043', '00012', '00077', '00093']
+toMake7030 = ['00055', '00076', '00099', '00063', '00021',
+            '00017', '00002', '00006', '00030', '00024',
+            '00068', '00041', '00085', '00070', '00024',
+            '00019', '00088', '00065', '00023', '00031']
 
 def extract(source, toMakeTest, toMakeValidate, dest):
     for root, dirs, files in os.walk(source):
@@ -35,7 +39,7 @@ def extract(source, toMakeTest, toMakeValidate, dest):
                     shutil.move(originalFile, destination)
 
 
-extract('../slices/test data', toMakeTest, toMakeValidate, dest)
+extract('../slices/training data', toMake7030, toMakeValidate, dest)
 
 print('here')
 

@@ -2,6 +2,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.callbacks import ModelCheckpoint
 import random
 
 import os
@@ -20,17 +21,20 @@ train_datagen = ImageDataGenerator(rescale=1./255)
 test_datagen = ImageDataGenerator(rescale=1./255)
 
 model = Sequential()
-model.add(Conv2D(32, (3,3), activation='relu', input_shape=(256,256,3)))
+model.add(Conv2D(32, (2,2), activation='relu', input_shape=(256,256,3)))
+model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Conv2D(64, (3,3), activation='relu'))
+model.add(Conv2D(32, (2,2), activation='relu'))
+model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
 
-model.add(Conv2D(128, (3,3), activation = 'relu'))
+model.add(Conv2D(68, (2,2), activation = 'relu'))
+model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
 
-model.add(Conv2D(256, (3,3), activation = 'relu'))
-#model.add(BatchNormalization())
+model.add(Conv2D(128, (2,2), activation = 'relu'))
+model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
 
 model.add(Flatten())
@@ -38,14 +42,15 @@ model.add(Dense(256))
 model.add(Dropout(0.5))
 model.add(Dense(10, activation='softmax'))
 
-model.compile(optimizer='adam', loss='categorical_crossentropy',
+model.compile(optimizer='adam', loss='mean_squared_error',
         metrics=['accuracy'])
 
 train_generator = train_datagen.flow_from_directory(
         trainingPath,
         target_size=(256, 256),
         batch_size=100,
-        class_mode='categorical')
+        class_mode='categorical',
+        shuffle = True)
 
 validation_generator = test_datagen.flow_from_directory(
         validationPath,
@@ -53,12 +58,15 @@ validation_generator = test_datagen.flow_from_directory(
         batch_size=100,
         class_mode='categorical')
 
+filepath = "model.h5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
+callbacks_list = [checkpoint]
+
 model.fit_generator(
         train_generator,
-        steps_per_epoch=9000/100,
+        steps_per_epoch=7000/100,
         epochs=100,
         validation_data=validation_generator,
-        validation_steps=1000/100,
-        shuffle = True)
+        validation_steps=3000/100)
 
 model.save_weights('firstTraining.h5')
