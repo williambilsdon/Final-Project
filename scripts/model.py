@@ -3,6 +3,8 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras.callbacks import ModelCheckpoint
+from keras.layers.normalization import BatchNormalization
+
 import random
 
 import os
@@ -22,23 +24,35 @@ test_datagen = ImageDataGenerator(rescale=1./255)
 
 model = Sequential()
 model.add(Conv2D(32, (2,2), activation='relu', input_shape=(256,256,3)))
-model.add(BatchNormalization())
+#model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(32, (2,2), activation='relu'))
-model.add(BatchNormalization())
+#model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
 
-model.add(Conv2D(68, (2,2), activation = 'relu'))
-model.add(BatchNormalization())
+model.add(Conv2D(64, (2,2), activation = 'relu'))
+#model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
 
 model.add(Conv2D(128, (2,2), activation = 'relu'))
-model.add(BatchNormalization())
+#model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
 
+model.add(Conv2D(128,(2,2), activation = 'relu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+
+model.add(Conv2D(256, (2,2), activation = 'relu'))
+#model.add(BatchNormalization())
+
+
+#model.add(Conv2D(256, (2,2), activation = 'relu'))
+#model.add(MaxPooling2D(pool_size=(2,2)))
+
+#model.add(Conv2D(512, (2,2), activation = 'relu'))
+
 model.add(Flatten())
-model.add(Dense(256))
+model.add(Dense(512))
 model.add(Dropout(0.5))
 model.add(Dense(10, activation='softmax'))
 
@@ -69,4 +83,4 @@ model.fit_generator(
         validation_data=validation_generator,
         validation_steps=3000/100)
 
-model.save_weights('firstTraining.h5')
+model.save_weights('thirdTraining.h5')
