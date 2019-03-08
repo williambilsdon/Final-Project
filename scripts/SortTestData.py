@@ -15,7 +15,7 @@ holder = "holder.wav"
 
 
 
-def specgram(trackDest, genre, trackSource, sliceDest):
+def specgram(trackDest, trackSource, sliceDest):
     file = audiosegment.from_mp3(trackSource)
 
     #check if mp3 is mono audio
@@ -50,11 +50,11 @@ for root, dirs, files in os.walk(source):
 
         trackSource = source + '/' + splitName[0] + '/' + filename
 
-        sliceDest = sDestination 
+        sliceDest = sDestination
 
         #print(trackSource)
 
-        specgram(trackDest, splitName, trackSource, sliceDest)
+        specgram(trackDest, trackSource, sliceDest)
 
 
 

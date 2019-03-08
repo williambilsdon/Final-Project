@@ -12,9 +12,9 @@ import os
 import PIL
 from PIL import Image
 
-trainingPath = '../slices/training data'
+trainingPath = '../wholepngs/training data'
 testPath = '../slices/test data'
-validationPath = '../slices/validation data'
+validationPath = '../wholepngs/validation data'
 
 
 
@@ -78,9 +78,9 @@ callbacks_list = [checkpoint]
 
 model.fit_generator(
         train_generator,
-        steps_per_epoch=7000/100,
+        steps_per_epoch=700/100,
         epochs=100,
         validation_data=validation_generator,
-        validation_steps=3000/100)
+        validation_steps=300/100)
 
-model.save_weights('thirdTraining.h5')
+model.save_weights('wholepngtraining1.h5')
