@@ -71,13 +71,9 @@ def specgram(trackDest, trackSource, sliceDest):
     imageSlice(trackDest, sliceDest)
 
 error = 0
-i = 1
 csvIDs = []
 for row in csvFile:
     split = list(row[0])
-
-    print(i)
-    i+=1
 
     while len(split) < 6:
         split.insert(0, '0')
@@ -106,4 +102,4 @@ for row in csvFile:
                         specgram(trackDestination, source, sliceDestination)
                     except:
                         error += 1
-                        print('error')
+                        print(error)
