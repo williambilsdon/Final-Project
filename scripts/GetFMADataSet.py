@@ -71,7 +71,49 @@ def specgram(trackDest, trackSource, sliceDest):
     imageSlice(trackDest, sliceDest)
 
 error = 0
-csvIDs = []
+
+numRock = 0
+numHipHop = 0
+numCountry = 0
+numJazz = 0
+numClassical = 0
+numBlues = 0
+numPop = 0
+
+def checkNumEach(genre):
+    if genre == 'rock':
+        if numRock < 100:
+            numRock+=1
+            return True
+    elif genre == 'hiphop':
+        if numHipHop < 100:
+            numHipHop+=1
+            return True
+    elif genre == 'country':
+        if numCountry < 100:
+            numCountry+=1
+            return True
+    elif genre == 'jazz':
+        if numJazz < 100:
+            numJazz+=1
+            return True
+    elif genre == 'classical':
+        if numClassical < 100:
+            numClassical+=1
+            return True
+    elif genre == 'blues':
+        if numBlues < 100:
+            numBlues+=1
+            return True
+    elif genre == 'pop':
+        if numPop < 100:
+            numPop+=1
+            return True
+    else:
+        return False
+
+
+
 for row in csvFile:
     split = list(row[0])
 
@@ -94,12 +136,13 @@ for row in csvFile:
                     genre = 'hiphop'
 
                 if genre in genreValues:
-                    source = root + '/' + filename
-                    trackDestination = trackDest + '/' + genre + '/' + genre + '_fma' + trackNum +'.png'
-                    sliceDestination = sliceDest + '/' + genre
+                    if checkNumEach(genre) is True:
+                        source = root + '/' + filename
+                        trackDestination = trackDest + '/' + genre + '/' + genre + '_fma' + trackNum +'.png'
+                        sliceDestination = sliceDest + '/' + genre
 
-                    try:
-                        specgram(trackDestination, source, sliceDestination)
-                    except:
-                        error += 1
-                        print(error)
+                        try:
+                            specgram(trackDestination, source, sliceDestination)
+                        except:
+                            error += 1
+                            print(error)
