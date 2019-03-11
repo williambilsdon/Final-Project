@@ -2,43 +2,49 @@ import os
 import shutil
 import random
 
-#source = '../slices/training data'
-#dest = '../slices/test data'
-destVal = '../wholepngs/validation data'
+sourceWhole = '../wholepngs/training'
+sourceSlice = '../slices/training'
 
-toMakeValidate = ['00000', '00043', '00012', '00077', '00093',
-                '00076', '00099', '00063', '00021', '00055',
-                '00017', '00002', '00006', '00030', '00024',
-                '00068', '00041', '00085', '00070', '00024',
-                '00019', '00088', '00065', '00023', '00031',
-                '00034', '00026', '00059', '00084', '00005']
+destWhole = '../wholepngs/validation'
+destSlice = '../slices/validation'
 
 
-def extract(source, toMakeValidate, dest):
-    for root, dirs, files in os.walk(source):
-        for filename in files:
-            #testImageID = random.randint(0,9)
+genres = ['classical', 'country', 'jazz', 'pop', 'hiphop', 'blues', 'rock', 'metal', 'reggae', 'disco']
+
+def extract(source, dest):
+    for genre in genres:
+
+        paths = []
+        counter = 0
+
+        folder = source +'/'+genre
+
+        for root, dirs, files in os.walk(folder):
+            for filename in files:
+                location = folder + '/' + filename
+                paths.append(location)
+
+        numFiles = len(paths)
+        numToVal = (numFiles / 100) * 30
+        numToVal = round(numToVal)
+        maxIndex = numFiles - 1
+
+        while counter < numToVal:
+            index = random.randint(0, maxIndex)
+
+            path = paths[index]
+            split = path.split("/")
+            name = split[4]
+
+            destination = dest + '/' + genre + '/' + name
+
+            shutil.move(path, destination)
+            paths.pop(index)
+            maxIndex-=1
+            counter+=1
 
 
-            if(filename != '.DS_Store'):
-                name = os.path.splitext(filename)[0]
-                testTrack = name.split('_')
-
-                if testTrack[1] in toMakeValidate:
-
-                    originalFile = root + '/' + name + '.png'
-
-                    destination = destVal + '/' + name + '.png'
-
-                    shutil.move(originalFile, destination)
 
 
-extract('../wholepngs/training data', toMakeValidate, destVal)
-extract('../wholepngs/test data', toMakeValidate, destVal)
-
-print('here')
-
-#source = '../wholepngs/training data'
-#dest = '../wholepngs/test data'
-
-#extract(source, toMakeTest, dest)
+extract(sourceWhole, destWhole)
+extract(sourceSlice, destSlice)

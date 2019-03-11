@@ -3,19 +3,16 @@ from pydub import AudioSegment as audiosegment
 import matplotlib.pyplot as plt
 from scipy.io import wavfile as wav
 
-from ImageSlicer import imageSlice
-
-source = ("../gtzan")
+source = ("../../gtzan/gtzan_mp3")
 sourceFolders = os.listdir(source)
-destination = ("../wholepngs/training data")
-sDestination = ("../slices/training data")
+destination = ("../wholepngs/training")
 holder = "holder.wav"
 
 
 
 
 
-def specgram(trackDest, trackSource, sliceDest):
+def specgram(trackDest, trackSource):
     file = audiosegment.from_mp3(trackSource)
 
     #check if mp3 is mono audio
@@ -38,24 +35,13 @@ def specgram(trackDest, trackSource, sliceDest):
 
     os.remove(holder)
 
-    imageSlice(trackDest, sliceDest)
-
 for root, dirs, files in os.walk(source):
     for filename in files:
         trackNum = os.path.splitext(filename)[0]
         #print(trackNum)
-        splitName = trackNum.split(".")
+        splitName = root.split("/")
 
-        trackDest = destination + '/' + splitName[0] + '_' + splitName[1] + '.png'
-
-        trackSource = source + '/' + splitName[0] + '/' + filename
-
-        sliceDest = sDestination
-
-        #print(trackSource)
-
-        specgram(trackDest, trackSource, sliceDest)
-
-
-
-print("done")
+        if len(splitName) == 5:
+            trackDest = destination + '/' + splitName[4] + '/' + trackNum + '.png'
+            trackSource = root + '/' + filename
+            specgram(trackDest, trackSource)

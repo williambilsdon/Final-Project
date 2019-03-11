@@ -1,9 +1,6 @@
 import csv
 import os
-from pydub import AudioSegment as audiosegment
-import matplotlib.pyplot as plt
-from scipy.io import wavfile as wav
-import cv2
+import shutil
 
 holder = "holder.wav"
 csvLocation = '../../tracks.csv'
@@ -15,62 +12,6 @@ trackValDest = ('../wholepngs/validation data')
 sliceDest= ("../slices/training data")
 sliceValDest = ('../slices/validation data')
 
-genreValues = ['rock', 'classical', 'country', 'jazz', 'reggae', 'disco', 'pop', 'hiphop', 'metal', 'blues']
-
-def imageSlice(source, sliceDest):
-
-    imageX = 3200
-    numSlices = 10
-    xStride = imageX / numSlices
-
-    if os.path.splitext(source)[1] != '.DS_Store':
-        xPos = 0
-        newX = int(xPos) + int(xStride)
-                #print(destination)
-                #os.makedirs(destination)
-
-        filename = os.path.splitext(source)[0]
-
-        for i in range(0,10):
-            location = source
-            original = cv2.imread(location)
-            slice = original[0:2400, int(xPos):int(newX)]
-
-            name = filename.split('/')
-
-            cv2.imwrite((sliceDest + '/' + name[4] + '_' + str(i) + '.png'), slice)
-
-            #print(sliceDest + '/' + name[3] + '_' + str(i) + '.png')
-
-            xPos += xStride
-            newX += xStride
-
-def specgram(trackDest, trackSource, sliceDest):
-    file = audiosegment.from_mp3(trackSource)
-
-    #check if mp3 is mono audio
-    if file.channels != 1:
-        file = file.set_channels(1)
-
-    #save new mono file as a wav file
-    file.export(holder, format="wav")
-
-
-    frequency_rate, data = wav.read(holder, 'r')
-    fig, ax = plt.subplots(1)
-    fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
-    ax.axis('off')
-    pxx, frequency, bins, im = plt.specgram(x=data, Fs = frequency_rate, cmap = 'plasma', NFFT = 1024)
-    plt.ylim([0, 10000])
-    ax.axis('off')
-    fig.savefig(trackDest, dpi=500, frameon='false')
-    plt.close()
-
-    os.remove(holder)
-
-    imageSlice(trackDest, sliceDest)
-
-error = 0
 
 numRock = 0
 numHipHop = 0
@@ -80,38 +21,8 @@ numClassical = 0
 numBlues = 0
 numPop = 0
 
-def checkNumEach(genre):
-    if genre == 'rock':
-        if numRock < 100:
-            numRock+=1
-            return True
-    elif genre == 'hiphop':
-        if numHipHop < 100:
-            numHipHop+=1
-            return True
-    elif genre == 'country':
-        if numCountry < 100:
-            numCountry+=1
-            return True
-    elif genre == 'jazz':
-        if numJazz < 100:
-            numJazz+=1
-            return True
-    elif genre == 'classical':
-        if numClassical < 100:
-            numClassical+=1
-            return True
-    elif genre == 'blues':
-        if numBlues < 100:
-            numBlues+=1
-            return True
-    elif genre == 'pop':
-        if numPop < 100:
-            numPop+=1
-            return True
-    else:
-        return False
-
+genreValues = ['classical', 'country', 'jazz', 'pop', 'hiphop', 'blues', 'rock']
+genreQuants = [0, 0 ,0 ,0, 0, 0, 0]
 
 
 for row in csvFile:
@@ -136,13 +47,17 @@ for row in csvFile:
                     genre = 'hiphop'
 
                 if genre in genreValues:
-                    if checkNumEach(genre) is True:
-                        source = root + '/' + filename
-                        trackDestination = trackDest + '/' + genre + '/' + genre + '_fma' + trackNum +'.png'
-                        sliceDestination = sliceDest + '/' + genre
+                    index = genreValues.index(genre)
 
-                        try:
-                            specgram(trackDestination, source, sliceDestination)
-                        except:
-                            error += 1
-                            print(error)
+                    if all([ v == 50 for v in genreQuants ]) :
+                        exit()
+                    else:
+                        if genreQuants[index] < 50:
+                            source = root + '/' + filename
+
+                            destination = '../../gtzan/gtzan_mp3/' + genre + '/' + filename
+
+                            shutil.move(source, destination)
+                            genreQuants[index] += 1
+                        else:
+                            os.remove(root + '/' + filename)

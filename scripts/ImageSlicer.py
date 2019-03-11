@@ -1,6 +1,9 @@
 import cv2
 import os
 
+destination = '../slices/training'
+sources = '../wholepngs/training'
+
 def imageSlice(source, sliceDest):
 
     imageX = 3200
@@ -13,18 +16,26 @@ def imageSlice(source, sliceDest):
                 #print(destination)
                 #os.makedirs(destination)
 
-        filename = os.path.splitext(source)[0]
-
         for i in range(0,10):
             location = source
             original = cv2.imread(location)
             slice = original[0:2400, int(xPos):int(newX)]
 
-            name = filename.split('/')
-
-            cv2.imwrite((sliceDest + '/' + name[3] + '_' + str(i) + '.png'), slice)
-
-            #print(sliceDest + '/' + name[3] + '_' + str(i) + '.png')
+            cv2.imwrite((sliceDest + str(i) + '.png'), slice)
 
             xPos += xStride
             newX += xStride
+
+
+for root, dirs, files in os.walk(sources):
+    for filename in files:
+        if filename != '.DS_Store':
+            genre = root.split("/")
+
+            if len(genre) == 4:
+                genre = genre[3]
+
+                source = root + '/' + filename
+                sliceDest = destination + '/' + genre + '/' + os.path.splitext(filename)[0] + '_'
+
+                imageSlice(source, sliceDest)
