@@ -1,14 +1,46 @@
-from __future__ import absolute_import, division, print_function
-
-# TensorFlow and tf.keras
-import tensorflow as tf
-from tensorflow import keras
-
-# Helper libraries
+from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential, load_model
+from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.callbacks import ModelCheckpoint
+from keras.layers.normalization import BatchNormalization
+from keras.preprocessing.image import img_to_array
 import numpy as np
-import matplotlib.pyplot as plt
 
+import random
+import cv2
 import os
 
-TRAIN_DIR = '../training data'
-TEST_DIR = '../test data'
+imageX = 3200
+numSlices = 10
+xStride = imageX/numSlices
+xPos = 0
+newX = int(xPos) + int(xStride)
+
+image_path = '019133.png'
+img = cv2.imread(image_path)
+
+
+model = load_model('130319_1_Model.h5')
+
+predictions = []
+
+for i in range(0,10):
+    slice = img[0:2400, int(xPos):int(newX)]
+
+    cv2.imwrite(('temp.png'), slice)
+    image = cv2.imread('temp.png')
+    image = cv2.resize(image, (256, 256))
+    image = image.astype("float") / 255.0
+    image = img_to_array(image)
+    image = np.expand_dims(image, axis=0)
+
+    result = model.predict(image)[0]
+    idx = np.argmax(result)
+
+    predictions.append(idx)
+
+    xPos += xStride
+    newX += xStride
+
+print(np.bincount(predictions).argmax())
