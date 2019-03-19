@@ -17,7 +17,9 @@ xStride = imageX/numSlices
 xPos = 0
 newX = int(xPos) + int(xStride)
 
-image_path = '019133.png'
+genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
+
+image_path = 'pop.00056.png'
 img = cv2.imread(image_path)
 
 
@@ -36,11 +38,20 @@ for i in range(0,10):
     image = np.expand_dims(image, axis=0)
 
     result = model.predict(image)[0]
-    idx = np.argmax(result)
+    print(result)
+    maxNum = max(result)
+    id = np.where(result == maxNum)
 
-    predictions.append(idx)
+    predictions.append(maxNum)
+
+    print(maxNum)
 
     xPos += xStride
     newX += xStride
 
-print(np.bincount(predictions).argmax())
+print(predictions)
+
+wholePred = np.bincount(predictions).argmax()
+genreGuess = genres[wholePred]
+
+print(genreGuess)
