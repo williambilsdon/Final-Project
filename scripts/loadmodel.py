@@ -6,6 +6,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.layers.normalization import BatchNormalization
 from keras.preprocessing.image import img_to_array
 import numpy as np
+import operator
 
 import random
 import cv2
@@ -19,39 +20,73 @@ newX = int(xPos) + int(xStride)
 
 genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 
-image_path = 'pop.00056.png'
-img = cv2.imread(image_path)
+def isBigger(curNum, nextNum):
+    if curNum < nextNum:
+        predNum = nextNum
+    print(curNum)
+    print(nextNum)
 
 
+model = Sequential()
 model = load_model('130319_1_Model.h5')
 
-predictions = []
+countArray = [0,0,0,0,0,0,0,0,0,0]
 
-for i in range(0,10):
-    slice = img[0:2400, int(xPos):int(newX)]
+genreCountDict = dict(zip(genres,countArray))
 
-    cv2.imwrite(('temp.png'), slice)
-    image = cv2.imread('temp.png')
-    image = cv2.resize(image, (256, 256))
-    image = image.astype("float") / 255.0
-    image = img_to_array(image)
-    image = np.expand_dims(image, axis=0)
 
-    result = model.predict(image)[0]
-    print(result)
-    maxNum = max(result)
-    id = np.where(result == maxNum)
+for root, dirs, files in os.walk('../wholepngs'):
+    for filename in files:
+        predictions = []
+        print(filename)
 
-    predictions.append(maxNum)
+        imageX = 3200
+        numSlices = 10
+        xStride = imageX/numSlices
+        xPos = 0
+        newX = int(xPos) + int(xStride)
+        if filename != '.DS_Store':
+            img = cv2.imread(root + '/' + filename)
+            print('new')
+            for i in range(0,10):
+                slice = img[0:2400, int(xPos):int(newX)]
 
-    print(maxNum)
+                xPos += xStride
+                newX += xStride
 
-    xPos += xStride
-    newX += xStride
+                cv2.imwrite(('temp.png'), slice)
+                image = cv2.imread('temp.png')
+                os.remove('temp.png')
+
+                image = cv2.resize(image, (256, 256))
+                image = image.astype("float") / 255.0
+                image = img_to_array(image)
+                image = np.expand_dims(image, axis=0)
+                #proba = model.predict(image)[0]
+                #idx = np.argmax(proba)
+                prediction = model.predict_classes(image)
+                pred = prediction
+                print(prediction)
+                predID = 0
+                #for i in range(0,9):
+                #    print(i)
+                #    if pred[predID] < pred[i]:
+                #        predID = i
+                #    print(predID)
+
+
+
+
+                predictions.append(predID)
+                print(predictions)
+
+            genreID = np.bincount(predictions).argmax()
+            print(genres[genreID])
+
+
+
 
 print(predictions)
 
-wholePred = np.bincount(predictions).argmax()
-genreGuess = genres[wholePred]
 
 print(genreGuess)
