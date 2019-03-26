@@ -34,6 +34,8 @@ countArray = [0,0,0,0,0,0,0,0,0,0]
 
 genreCountDict = dict(zip(genres,countArray))
 
+values = [0,0,0,0,0,0,0,0,0]
+
 
 for root, dirs, files in os.walk('../wholepngs'):
     for filename in files:
@@ -64,15 +66,25 @@ for root, dirs, files in os.walk('../wholepngs'):
                 image = np.expand_dims(image, axis=0)
                 #proba = model.predict(image)[0]
                 #idx = np.argmax(proba)
-                prediction = model.predict_classes(image)
+                #prediction = model.predict_classes(image)
+                prediction = model.predict(image)[0]
                 pred = prediction
-                print(prediction)
+
                 predID = 0
-                #for i in range(0,9):
+                for i in range(0,9):
+                    values[i] = pred[i]
                 #    print(i)
                 #    if pred[predID] < pred[i]:
                 #        predID = i
                 #    print(predID)
+
+                print(values)
+
+                maxNum = max(values)
+                print(maxNum)
+
+                #for i in range(0, 9):
+
 
 
 
