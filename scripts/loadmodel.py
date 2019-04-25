@@ -81,66 +81,6 @@ for i in range(0,10):
     result = model.predict(test_image, batch_size=1)
     print(result)
 
-# for root, dirs, files in os.walk('../wholepngs'):
-#     for filename in files:
-#         predictions = []
-#         print(filename)
-#
-#         imageX = 3200
-#         numSlices = 10
-#         xStride = imageX/numSlices
-#         xPos = 0
-#         newX = int(xPos) + int(xStride)
-#         if filename != '.DS_Store':
-#             img = cv2.imread(root + '/' + filename)
-#             print('new')
-#             for i in range(0,10):
-#                 slice = img[0:2400, int(xPos):int(newX)]
-#
-#                 xPos += xStride
-#                 newX += xStride
-#
-#                 cv2.imwrite(('temp.png'), slice)
-#                 image = cv2.imread('temp.png')
-#                 os.remove('temp.png')
-#
-#                 image = cv2.resize(image, (256, 256))
-#                 image = image.astype("float") / 255.0
-#                 image = img_to_array(image)
-#                 image = np.expand_dims(image, axis=0)
-#                 #proba = model.predict(image)[0]
-#                 #idx = np.argmax(proba)
-#                 #prediction = model.predict_classes(image)
-#                 prediction = model.predict(image)[0]
-#                 pred = prediction
-#
-#                 predID = 0
-#                 for i in range(0,9):
-#                     values[i] = pred[i]
-#                 #    print(i)
-#                 #    if pred[predID] < pred[i]:
-#                 #        predID = i
-#                 #    print(predID)
-#
-#                 print(values)
-#
-#                 maxNum = max(values)
-#                 print(maxNum)
-#
-#                 #for i in range(0, 9):
-#
-#
-#
-#
-#
-#                 predictions.append(predID)
-#                 print(predictions)
-#
-#             genreID = np.bincount(predictions).argmax()
-#             print(genres[genreID])
-
-
-
 
 print(predictions)
 
