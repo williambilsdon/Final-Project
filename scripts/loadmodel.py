@@ -15,24 +15,11 @@ import random
 import cv2
 import os
 
-
-imageX = 3200
-numSlices = 10
-xStride = imageX/numSlices
-xPos = 0
-newX = int(xPos) + int(xStride)
-
 genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 
 model = Sequential()
 model = load_model('130319_1_Model.h5')
 model.load_weights('130319_1_Weights.h5')
-
-countArray = [0,0,0,0,0,0,0,0,0,0]
-
-genreCountDict = dict(zip(genres,countArray))
-
-values = [0,0,0,0,0,0,0,0,0]
 
 imgDims = 256
 
@@ -64,7 +51,7 @@ numCorrect = [0,0,0,0,0,0,0,0,0,0]
 for root, dirs, files in os.walk("../wholepngs/validation"):
     for file in files:
         if file.endswith(".png"):
-            img = cv2.imread(file)
+
             splitten = root.split('/')
             if splitten[3] == genres[0]:
                 trackingIndex = 0
@@ -91,6 +78,18 @@ for root, dirs, files in os.walk("../wholepngs/validation"):
 
             countArray = [0,0,0,0,0,0,0,0,0,0]
 
+            imageX = 3200
+            numSlices = 10
+            xStride = imageX/numSlices
+            xPos = 0
+            newX = int(xPos) + int(xStride)
+
+            locale = root + '/' + file
+
+            img = cv2.imread(locale)
+
+            #print(locale)
+
             for i in range(0,10):
                 slice = img[0:2400, int(xPos):int(newX)]
                 xPos += xStride
@@ -114,7 +113,8 @@ for root, dirs, files in os.walk("../wholepngs/validation"):
                 countArray[index2] = countArray[index2] + 1
             prediction = countArray.index(max(countArray))
 
-            if prediciton == splitten[3]:
+            if prediction == splitten[3]:
                 numCorrect[trackingIndex] = numCorrect[trackingIndex] + 1
+
 print(numTracks)
 print(numCorrect)
