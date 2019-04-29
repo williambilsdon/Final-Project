@@ -156,8 +156,8 @@ class App(QWidget):
 
             os.remove('temp.png')
 
-            prediction = countArray.index(max(countArray))
-            print(genres[prediction])
+        prediction = countArray.index(max(countArray))
+        print(genres[prediction])
         os.remove('fullsize.png')
         print(countArray)
 
