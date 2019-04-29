@@ -1,6 +1,7 @@
 import sys, os, random, cv2
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from PIL import Image
 from pydub import AudioSegment as audiosegment
 from scipy.io import wavfile as wav
@@ -18,6 +19,38 @@ import numpy as np
 
 fileN = ""
 
+def createspecgram(self):
+    global fileN
+    file = audiosegment.from_mp3(fileN)
+
+    if file.channels != 1:
+        file = file.set_channels(1)
+
+        #save new mono file as a wav file
+        file.export('holder.wav', format="wav")
+
+
+        frequency_rate, data = wav.read('holder.wav', 'r')
+        fig, ax = plt.subplots(1)
+        fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
+        ax.axis('off')
+        pxx, frequency, bins, im = plt.specgram(x=data, Fs = frequency_rate, cmap = 'plasma', NFFT = 1024)
+        plt.ylim([0, 10000])
+        ax.axis('off')
+        fig.savefig('track.png', dpi=500, frameon='false')
+        fig.savefig('fullsize.png', dpi=500, frameon='false')
+        plt.close()
+
+        os.remove('holder.wav')
+
+        img = Image.open("track.png")
+
+        cover = resizeimage.resize_cover(img, [410, 200])
+        cover.save("track.png", img.format)
+
+        self.imageLink = "track.png"
+        self.showimage(self.imageLink)
+
 class App(QWidget):
 
     def __init__(self):
@@ -25,10 +58,10 @@ class App(QWidget):
         self.title = 'Music Genre Classifier'
         self.left = 10
         self.top = 10
-        self.width = 640
-        self.height = 480
+        self.width = 430
+        self.height = 280
         self.imageLink = ""
-        self.genre = "Test"
+        self.genre = ""
         self.initUI()
 
     def initUI(self):
@@ -38,15 +71,15 @@ class App(QWidget):
         self.btnSelect.clicked.connect(self.getfile)
         self.btnSelect.move(10,10)
 
-        self.btnGenerate = QPushButton("Create Spectrogram", self)
+        self.btnGenerate = QPushButton("Classify Spectrogram", self)
         self.btnGenerate.resize(self.btnGenerate.sizeHint())
-        self.btnGenerate.clicked.connect(self.createspecgram)
-        self.btnGenerate.move(220,10)
+        self.btnGenerate.clicked.connect(self.classify)
+        self.btnGenerate.move(255,10)
 
-        self.btnClassify = QPushButton("Classify", self)
-        self.btnClassify.resize(self.btnGenerate.sizeHint())
-        self.btnClassify.clicked.connect(self.classify)
-        self.btnClassify.move(470, 10)
+        self.label = QLabel(self)
+        self.label.setGeometry(10,10,410, 200)
+        self.label.move(10, 70)
+        self.label.setStyleSheet("QLabel {background-color: #e6e6e6;}")
 
         self.genreLabel = QLabel(self)
 
@@ -55,52 +88,22 @@ class App(QWidget):
         newFont = QFont("serif", 20, QFont.Bold)
         self.genreLabel.setFont(newFont)
         self.genreLabel.setGeometry(10,10,140, 40)
-        self.genreLabel.move(280, 150)
+        width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
+        self.genreLabel.move((215-(width/2)), 150)
+        #self.genreLabel.setAlignment(Qt.AlignCenter)
 
-
-        self.label = QLabel(self)
-        self.label.setGeometry(10,10,620, 200)
-        self.label.move(10, 270)
         self.show()
 
 
+
     def getfile(self):
+        self.genreLabel.setText("")
+        self.genreLabel.repaint()
         fileName = QFileDialog.getOpenFileName(self, 'Open File')
         print(fileName[0])
         global fileN
         fileN = fileName[0]
-
-    def createspecgram(self):
-        global fileN
-        file = audiosegment.from_mp3(fileN)
-
-        if file.channels != 1:
-            file = file.set_channels(1)
-
-            #save new mono file as a wav file
-            file.export('holder.wav', format="wav")
-
-
-            frequency_rate, data = wav.read('holder.wav', 'r')
-            fig, ax = plt.subplots(1)
-            fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
-            ax.axis('off')
-            pxx, frequency, bins, im = plt.specgram(x=data, Fs = frequency_rate, cmap = 'plasma', NFFT = 1024)
-            plt.ylim([0, 10000])
-            ax.axis('off')
-            fig.savefig('track.png', dpi=500, frameon='false')
-            fig.savefig('fullsize.png', dpi=500, frameon='false')
-            plt.close()
-
-            os.remove('holder.wav')
-
-            img = Image.open("track.png")
-
-            cover = resizeimage.resize_cover(img, [620, 200])
-            cover.save("track.png", img.format)
-
-            self.imageLink = "track.png"
-            self.showimage(self.imageLink)
+        createspecgram(self)
 
 
 
@@ -156,9 +159,12 @@ class App(QWidget):
             prediction = countArray.index(max(countArray))
             print(genres[prediction])
         os.remove('fullsize.png')
+        print(countArray)
 
         self.genre = genres[prediction]
         self.genreLabel.setText(self.genre)
+        width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
+        self.genreLabel.move((215-(width/2)), 150)
         self.genreLabel.repaint()
 
 
