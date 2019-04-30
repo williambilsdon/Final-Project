@@ -113,7 +113,7 @@ for root, dirs, files in os.walk("../wholepngs/validation"):
                 countArray[index2] = countArray[index2] + 1
             prediction = countArray.index(max(countArray))
 
-            if prediction == splitten[3]:
+            if genres[prediction] == splitten[3]:
                 numCorrect[trackingIndex] = numCorrect[trackingIndex] + 1
 
 print(numTracks)

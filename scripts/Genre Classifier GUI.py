@@ -18,8 +18,10 @@ import numpy as np
 
 
 fileN = ""
+fullSpectrograms = []
+smallSpectrograms = []
 
-def createspecgram(self):
+def createspecgram(self, i):
     global fileN
     file = audiosegment.from_mp3(fileN)
 
@@ -29,6 +31,8 @@ def createspecgram(self):
         #save new mono file as a wav file
         file.export('holder.wav', format="wav")
 
+        fullDest = 'fullsize' + str(i) + '.png'
+        smallDest = 'track'+ str(i) + '.png'
 
         frequency_rate, data = wav.read('holder.wav', 'r')
         fig, ax = plt.subplots(1)
@@ -37,19 +41,23 @@ def createspecgram(self):
         pxx, frequency, bins, im = plt.specgram(x=data, Fs = frequency_rate, cmap = 'plasma', NFFT = 1024)
         plt.ylim([0, 10000])
         ax.axis('off')
-        fig.savefig('track.png', dpi=500, frameon='false')
-        fig.savefig('fullsize.png', dpi=500, frameon='false')
+        fig.savefig(smallDest, dpi=500, frameon='false')
+        fig.savefig(fullDest, dpi=500, frameon='false')
         plt.close()
 
         os.remove('holder.wav')
 
-        img = Image.open("track.png")
+        fullSpectrograms.append(fullDest)
+        smallSpectrograms.append(smallDest)
+        img = Image.open(smallDest)
 
-        cover = resizeimage.resize_cover(img, [410, 200])
-        cover.save("track.png", img.format)
+        print(fullSpectrograms)
 
-        self.imageLink = "track.png"
-        self.showimage(self.imageLink)
+        resize = resizeimage.resize_cover(img, [410, 200])
+        resize.save(smallDest, img.format)
+
+        #self.imageLink = "track.png"
+        #self.showimage(self.imageLink)
 
 class App(QWidget):
 
@@ -99,11 +107,17 @@ class App(QWidget):
     def getfile(self):
         self.genreLabel.setText("")
         self.genreLabel.repaint()
-        fileName = QFileDialog.getOpenFileName(self, 'Open File')
-        print(fileName[0])
+        fileNames = QFileDialog.getOpenFileNames(self, 'Open File')
+        #print(fileName[0])
         global fileN
-        fileN = fileName[0]
-        createspecgram(self)
+        i = 0
+        print(fileNames)
+        length = len(fileNames[0])
+        while i < length:
+            fileN = fileNames[0][i]
+            print(fileNames[0][i])
+            createspecgram(self, i)
+            i = i +1
 
 
 
@@ -115,57 +129,57 @@ class App(QWidget):
 
 
     def classify(self):
-        imageX = 3200
-        numSlices = 10
-        xStride = imageX/numSlices
-        xPos = 0
-        newX = int(xPos) + int(xStride)
-        prediction = 0
+        for fullspec in fullSpectrograms:
+            imageX = 3200
+            numSlices = 10
+            xStride = imageX/numSlices
+            xPos = 0
+            newX = int(xPos) + int(xStride)
+            prediction = 0
 
-        imgDims = 256
+            imgDims = 256
 
-        genres = ['Blues', 'Classical', 'Country', 'Disco', 'Hip-Hop', 'Jazz', 'Metal', 'Pop', 'Reggae', 'Rock']
+            genres = ['Blues', 'Classical', 'Country', 'Disco', 'Hip-Hop', 'Jazz', 'Metal', 'Pop', 'Reggae', 'Rock']
 
-        model = Sequential()
-        model = load_model('130319_1_Model.h5')
-        model.load_weights('130319_1_Weights.h5')
+            model = Sequential()
+            model = load_model('130319_1_Model.h5')
+            model.load_weights('130319_1_Weights.h5')
 
-        countArray = [0,0,0,0,0,0,0,0,0,0]
+            countArray = [0,0,0,0,0,0,0,0,0,0]
 
-        img = cv2.imread('fullsize.png')
-        for i in range(0,10):
-            slice = img[0:2400, int(xPos):int(newX)]
-            xPos += xStride
-            newX += xStride
-            cv2.imwrite(('temp.png'), slice)
+            img = cv2.imread(fullspec)
+            for i in range(0,10):
+                slice = img[0:2400, int(xPos):int(newX)]
+                xPos += xStride
+                newX += xStride
+                cv2.imwrite(('temp.png'), slice)
 
-            test_image = image.load_img('temp.png', target_size=(imgDims, imgDims))
-            test_image = image.img_to_array(test_image)
-            test_image = np.expand_dims(test_image, axis=0)
+                test_image = image.load_img('temp.png', target_size=(imgDims, imgDims))
+                test_image = image.img_to_array(test_image)
+                test_image = np.expand_dims(test_image, axis=0)
 
 
-            result = model.predict(test_image, batch_size=1)
-            resultindex = np.where(result == np.amax(result))
+                result = model.predict(test_image, batch_size=1)
+                resultindex = np.where(result == np.amax(result))
 
-            index = resultindex[1]
-            for j in range(0,10):
-                if index == j:
-                    index2 = j
-            #print(resultindex[1])
-            countArray[index2] = countArray[index2] + 1
+                index = resultindex[1]
+                for j in range(0,10):
+                    if index == j:
+                        index2 = j
+                #print(resultindex[1])
+                countArray[index2] = countArray[index2] + 1
 
-            os.remove('temp.png')
+                os.remove('temp.png')
 
-        prediction = countArray.index(max(countArray))
-        print(genres[prediction])
-        os.remove('fullsize.png')
-        print(countArray)
+            prediction = countArray.index(max(countArray))
+            print(genres[prediction])
+            os.remove(fullspec)
 
-        self.genre = genres[prediction]
-        self.genreLabel.setText(self.genre)
-        width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
-        self.genreLabel.move((215-(width/2)), 150)
-        self.genreLabel.repaint()
+            self.genre = genres[prediction]
+            self.genreLabel.setText(self.genre)
+            width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
+            self.genreLabel.move((215-(width/2)), 150)
+            self.genreLabel.repaint()
 
 
 
