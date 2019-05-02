@@ -20,10 +20,14 @@ import numpy as np
 fileN = ""
 fullSpectrograms = []
 smallSpectrograms = []
+classification = []
+trackNames = []
 
-def createspecgram(self, i):
+def createspecgram(self):
     global fileN
     file = audiosegment.from_mp3(fileN)
+
+    trackNames.append(fileN)
 
     if file.channels != 1:
         file = file.set_channels(1)
@@ -31,8 +35,8 @@ def createspecgram(self, i):
         #save new mono file as a wav file
         file.export('holder.wav', format="wav")
 
-        fullDest = 'fullsize' + str(i) + '.png'
-        smallDest = 'track'+ str(i) + '.png'
+        fullDest = 'fullsize' + str(self.i) + '.png'
+        smallDest = 'track'+ str(self.i) + '.png'
 
         frequency_rate, data = wav.read('holder.wav', 'r')
         fig, ax = plt.subplots(1)
@@ -51,13 +55,24 @@ def createspecgram(self, i):
         smallSpectrograms.append(smallDest)
         img = Image.open(smallDest)
 
-        print(fullSpectrograms)
-
         resize = resizeimage.resize_cover(img, [410, 200])
         resize.save(smallDest, img.format)
 
-        #self.imageLink = "track.png"
-        #self.showimage(self.imageLink)
+def showimage(self):
+    self.label.setPixmap(QPixmap(smallSpectrograms[self.imageIndex]))
+    self.label.repaint()
+
+def updateGenreText(self):
+    self.genreLabel.setText(classification[self.imageIndex])
+    width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
+    self.genreLabel.move((215-(width/2)), 150)
+    self.genreLabel.repaint()
+
+def showTrackName(self):
+    self.trackLabel.setText(trackNames[self.imageIndex])
+    width = self.trackLabel.fontMetrics().boundingRect(self.trackLabel.text()).width()
+    self.trackLabel.move((215-(width/2)), 50)
+    self.trackLabel.repaint()
 
 class App(QWidget):
 
@@ -68,11 +83,18 @@ class App(QWidget):
         self.top = 10
         self.width = 430
         self.height = 280
-        self.imageLink = ""
+        self.imageIndex = 0
         self.genre = ""
+        self.i = 0
         self.initUI()
 
     def initUI(self):
+        newFont = QFont("serif", 10)
+        self.trackLabel = QLabel(self)
+        self.trackLabel.setFont(newFont)
+        self.trackLabel.setGeometry(10,10,430,20)
+        self.trackLabel.move(10, 50)
+
         self.setFixedSize(self.width, self.height)
         self.btnSelect = QPushButton("Select Song", self)
         self.btnSelect.resize(self.btnSelect.sizeHint())
@@ -91,18 +113,59 @@ class App(QWidget):
 
         self.genreLabel = QLabel(self)
 
-        #self.genreLabel.move(50,50)
         self.genreLabel.setText(self.genre)
         newFont = QFont("serif", 20, QFont.Bold)
         self.genreLabel.setFont(newFont)
         self.genreLabel.setGeometry(10,10,140, 40)
         width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
         self.genreLabel.move((215-(width/2)), 150)
-        #self.genreLabel.setAlignment(Qt.AlignCenter)
+
+        self.specImageChangerRight = QPushButton(">",self)
+        newFont = QFont("serif", 20, QFont.Bold)
+        self.specImageChangerRight.setFont(newFont)
+        self.specImageChangerRight.setGeometry(10,10,40,40)
+        self.specImageChangerRight.move(380, 150)
+        self.specImageChangerRight.clicked.connect(self.imgchangeRight)
+        self.specImageChangerRight.hide()
+
+        self.specImageChangerLeft = QPushButton("<",self)
+        newFont = QFont("serif", 20, QFont.Bold)
+        self.specImageChangerLeft.setFont(newFont)
+        self.specImageChangerLeft.setGeometry(10,10,40,40)
+        self.specImageChangerLeft.move(10, 150)
+        self.specImageChangerLeft.clicked.connect(self.imgchangeLeft)
+        self.specImageChangerLeft.hide()
+
 
         self.show()
 
+    def imgchangeLeft(self):
+        self.imageIndex = self.imageIndex - 1
+        if self.specImageChangerRight.isVisible() is False:
+            self.specImageChangerRight.show()
 
+        if self.imageIndex == 0:
+            self.specImageChangerLeft.hide()
+
+        showimage(self)
+        showTrackName(self)
+        try:
+            updateGenreText(self)
+        except:
+            print("Not classified")
+
+    def imgchangeRight(self):
+        self.imageIndex = self.imageIndex + 1
+        if self.specImageChangerLeft.isVisible() is False:
+            self.specImageChangerLeft.show()
+        if (self.imageIndex + 1) == len(smallSpectrograms):
+            self.specImageChangerRight.hide()
+        showimage(self)
+        showTrackName(self)
+        try:
+            updateGenreText(self)
+        except:
+            print("Not classified")
 
     def getfile(self):
         self.genreLabel.setText("")
@@ -110,22 +173,20 @@ class App(QWidget):
         fileNames = QFileDialog.getOpenFileNames(self, 'Open File')
         #print(fileName[0])
         global fileN
-        i = 0
-        print(fileNames)
         length = len(fileNames[0])
-        while i < length:
-            fileN = fileNames[0][i]
-            print(fileNames[0][i])
-            createspecgram(self, i)
-            i = i +1
+        j = 0
+        while j < length:
+            fileN = fileNames[0][j]
+            createspecgram(self)
+            self.i = self.i +1
+            j = j + 1
+
+        showimage(self)
+        showTrackName(self)
+        if len(smallSpectrograms) > 1:
+            self.specImageChangerRight.show()
 
 
-
-    def showimage(self,link):
-        print(link)
-        self.label.setPixmap(QPixmap(link))
-        self.label.repaint()
-        os.remove('track.png')
 
 
     def classify(self):
@@ -148,7 +209,7 @@ class App(QWidget):
             countArray = [0,0,0,0,0,0,0,0,0,0]
 
             img = cv2.imread(fullspec)
-            for i in range(0,10):
+            for k in range(0,10):
                 slice = img[0:2400, int(xPos):int(newX)]
                 xPos += xStride
                 newX += xStride
@@ -172,11 +233,13 @@ class App(QWidget):
                 os.remove('temp.png')
 
             prediction = countArray.index(max(countArray))
-            print(genres[prediction])
             os.remove(fullspec)
 
             self.genre = genres[prediction]
-            self.genreLabel.setText(self.genre)
+            classification.append(self.genre)
+            print(classification)
+            print(self.imageIndex)
+            self.genreLabel.setText(classification[self.imageIndex])
             width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
             self.genreLabel.move((215-(width/2)), 150)
             self.genreLabel.repaint()
