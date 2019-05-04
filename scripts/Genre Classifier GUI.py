@@ -25,7 +25,23 @@ trackNames = []
 
 def createspecgram(self):
     global fileN
+
     file = audiosegment.from_mp3(fileN)
+
+    held = False
+
+
+    if len(file) > 40000:
+        file.export('hold.mp3', format="mp3")
+        os.system('ffmpeg -t 30 -ss 10 -i hold.mp3 -acodec copy temp.mp3')
+        file = audiosegment.from_mp3('temp.mp3')
+        held = True
+    elif len(file) > 30000:
+        file.export('hold.mp3', format="mp3")
+        os.system('ffmpeg -t 30 -i hold.mp3 -acodec copy temp.mp3')
+        file = audiosegment.from_mp3('temp.mp3')
+        held = True
+
 
     trackNames.append(fileN)
 
@@ -50,6 +66,9 @@ def createspecgram(self):
         plt.close()
 
         os.remove('holder.wav')
+        if held:
+            os.remove('hold.mp3')
+            os.remove('temp.mp3')
 
         fullSpectrograms.append(fullDest)
         smallSpectrograms.append(smallDest)
@@ -191,6 +210,8 @@ class App(QWidget):
 
     def classify(self):
         for fullspec in fullSpectrograms:
+            print(fullspec)
+
             imageX = 3200
             numSlices = 10
             xStride = imageX/numSlices
