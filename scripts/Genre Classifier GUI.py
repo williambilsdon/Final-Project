@@ -82,7 +82,10 @@ def showimage(self):
     self.label.repaint()
 
 def updateGenreText(self):
-    self.genreLabel.setText(classification[self.imageIndex])
+    if self.imageIndex > (len(classification)-1):
+        self.genreLabel.setText("")
+    else:
+        self.genreLabel.setText(classification[self.imageIndex])
     width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
     self.genreLabel.move((215-(width/2)), 150)
     self.genreLabel.repaint()
@@ -168,10 +171,7 @@ class App(QWidget):
 
         showimage(self)
         showTrackName(self)
-        try:
-            updateGenreText(self)
-        except:
-            print("Not classified")
+        updateGenreText(self)
 
     def imgchangeRight(self):
         self.imageIndex = self.imageIndex + 1
@@ -181,10 +181,9 @@ class App(QWidget):
             self.specImageChangerRight.hide()
         showimage(self)
         showTrackName(self)
-        try:
-            updateGenreText(self)
-        except:
-            print("Not classified")
+
+        updateGenreText(self)
+
 
     def getfile(self):
         self.genreLabel.setText("")
@@ -202,6 +201,7 @@ class App(QWidget):
 
         showimage(self)
         showTrackName(self)
+        updateGenreText(self)
         if len(smallSpectrograms) > 1:
             self.specImageChangerRight.show()
 
@@ -210,60 +210,63 @@ class App(QWidget):
 
     def classify(self):
         for fullspec in fullSpectrograms:
-            print(fullspec)
+            print(len(classification))
+            print(fullSpectrograms.index(fullspec))
+            if (len(classification) == 0) or (fullSpectrograms.index(fullspec) > (len(classification) - 1)):
+                print(fullspec)
 
-            imageX = 3200
-            numSlices = 10
-            xStride = imageX/numSlices
-            xPos = 0
-            newX = int(xPos) + int(xStride)
-            prediction = 0
+                imageX = 3200
+                numSlices = 10
+                xStride = imageX/numSlices
+                xPos = 0
+                newX = int(xPos) + int(xStride)
+                prediction = 0
 
-            imgDims = 256
+                imgDims = 256
 
-            genres = ['Blues', 'Classical', 'Country', 'Disco', 'Hip-Hop', 'Jazz', 'Metal', 'Pop', 'Reggae', 'Rock']
+                genres = ['Blues', 'Classical', 'Country', 'Disco', 'Hip-Hop', 'Jazz', 'Metal', 'Pop', 'Reggae', 'Rock']
 
-            model = Sequential()
-            model = load_model('130319_1_Model.h5')
-            model.load_weights('130319_1_Weights.h5')
+                model = Sequential()
+                model = load_model('130319_1_Model.h5')
+                model.load_weights('130319_1_Weights.h5')
 
-            countArray = [0,0,0,0,0,0,0,0,0,0]
+                countArray = [0,0,0,0,0,0,0,0,0,0]
 
-            img = cv2.imread(fullspec)
-            for k in range(0,10):
-                slice = img[0:2400, int(xPos):int(newX)]
-                xPos += xStride
-                newX += xStride
-                cv2.imwrite(('temp.png'), slice)
+                img = cv2.imread(fullspec)
+                for k in range(0,10):
+                    slice = img[0:2400, int(xPos):int(newX)]
+                    xPos += xStride
+                    newX += xStride
+                    cv2.imwrite(('temp.png'), slice)
 
-                test_image = image.load_img('temp.png', target_size=(imgDims, imgDims))
-                test_image = image.img_to_array(test_image)
-                test_image = np.expand_dims(test_image, axis=0)
+                    test_image = image.load_img('temp.png', target_size=(imgDims, imgDims))
+                    test_image = image.img_to_array(test_image)
+                    test_image = np.expand_dims(test_image, axis=0)
 
 
-                result = model.predict(test_image, batch_size=1)
-                resultindex = np.where(result == np.amax(result))
+                    result = model.predict(test_image, batch_size=1)
+                    resultindex = np.where(result == np.amax(result))
 
-                index = resultindex[1]
-                for j in range(0,10):
-                    if index == j:
-                        index2 = j
-                #print(resultindex[1])
-                countArray[index2] = countArray[index2] + 1
+                    index = resultindex[1]
+                    for j in range(0,10):
+                        if index == j:
+                            index2 = j
+                    #print(resultindex[1])
+                    countArray[index2] = countArray[index2] + 1
 
-                os.remove('temp.png')
+                    os.remove('temp.png')
 
-            prediction = countArray.index(max(countArray))
-            os.remove(fullspec)
+                prediction = countArray.index(max(countArray))
+                os.remove(fullspec)
 
-            self.genre = genres[prediction]
-            classification.append(self.genre)
-            print(classification)
-            print(self.imageIndex)
-            self.genreLabel.setText(classification[self.imageIndex])
-            width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
-            self.genreLabel.move((215-(width/2)), 150)
-            self.genreLabel.repaint()
+                self.genre = genres[prediction]
+                classification.append(self.genre)
+                print(classification)
+                print(self.imageIndex)
+                self.genreLabel.setText(classification[self.imageIndex])
+                width = self.genreLabel.fontMetrics().boundingRect(self.genreLabel.text()).width()
+                self.genreLabel.move((215-(width/2)), 150)
+                self.genreLabel.repaint()
 
 
 
